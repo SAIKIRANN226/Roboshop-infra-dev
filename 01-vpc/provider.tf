@@ -7,7 +7,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "daws76s-state-dev"
+    bucket = "daws76s-state-dev"  # separate bucket and locking is created for dev
     key    = "vpc"
     region = "us-east-1"
     dynamodb_table = "daws76s-locking-dev"
