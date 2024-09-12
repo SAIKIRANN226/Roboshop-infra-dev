@@ -18,7 +18,7 @@ module "mongodb" {
 
 resource "null_resource" "mongodb" {
   # Changes to any instance of the cluster requires re-provisioning
-  triggers = {
+  triggers = {   # if there is any changes in the instance then it will trigger
     instance_id = module.mongodb.id
   }
 
@@ -31,7 +31,7 @@ resource "null_resource" "mongodb" {
     password = "DevOps321"
   }
 
-  provisioner "file" {
+  provisioner "file" {  # we need to copy the bootsrap inside the instance using the above connection
     source      = "bootstrap.sh"
     destination = "/tmp/bootstrap.sh"
   }
