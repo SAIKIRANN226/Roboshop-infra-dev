@@ -17,13 +17,10 @@ module "mongodb" {
 }
 
 resource "null_resource" "mongodb" {
-  # Changes to any instance of the cluster requires re-provisioning
-  triggers = {   # if there is any changes in the instance then it will trigger
+  triggers = {   
     instance_id = module.mongodb.id
   }
 
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
   connection {
     host = module.mongodb.private_ip
     type = "ssh"
@@ -37,7 +34,6 @@ resource "null_resource" "mongodb" {
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh mongodb dev"
@@ -64,13 +60,10 @@ module "redis" {
 }
 
 resource "null_resource" "redis" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.redis.id
   }
 
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
   connection {
     host = module.redis.private_ip
     type = "ssh"
@@ -84,7 +77,6 @@ resource "null_resource" "redis" {
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh redis dev"
@@ -112,13 +104,10 @@ module "mysql" {
 }
 
 resource "null_resource" "mysql" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.mysql.id
   }
 
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
   connection {
     host = module.mysql.private_ip
     type = "ssh"
@@ -132,7 +121,6 @@ resource "null_resource" "mysql" {
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh mysql dev"
@@ -160,13 +148,10 @@ module "rabbitmq" {
 }
 
 resource "null_resource" "rabbitmq" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.rabbitmq.id
   }
 
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
   connection {
     host = module.rabbitmq.private_ip
     type = "ssh"
@@ -180,7 +165,6 @@ resource "null_resource" "rabbitmq" {
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh rabbitmq dev"
