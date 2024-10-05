@@ -27,16 +27,13 @@ module "catalogue" {
     var.common_tags,
     var.tags
   )
-}
+} # So this instance is created to provision this we can use provisioners or user-data,we used provisioners because if it is fails then automatically stops here below
 
 resource "null_resource" "catalogue" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.catalogue.id
   }
 
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
   connection {
     host = module.catalogue.private_ip
     type = "ssh"
@@ -50,7 +47,6 @@ resource "null_resource" "catalogue" {
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh catalogue dev"
