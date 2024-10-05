@@ -1,4 +1,4 @@
-# For databases we implemented ansible pull strategy using ansible roles
+# For databases we implemented ansible pull strategy using ansible roles,so nodes are not connected to ansible server,nodes will fetch the configuration directly from the git and run it periodically
 
 module "mongodb" {
   source                 = "terraform-aws-modules/ec2-instance/aws"
