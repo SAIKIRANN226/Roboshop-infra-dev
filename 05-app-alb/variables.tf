@@ -6,7 +6,7 @@ variable "common_tags" {
   }
 }
 
-variable "tags" {
+variable "tags" {  # These are different tags
   default = {
     Component = "app-alb"
   }
