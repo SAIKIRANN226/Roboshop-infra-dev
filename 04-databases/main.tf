@@ -1,4 +1,4 @@
-# For databases we implemented pull strategy
+# For databases we implemented ansible pull strategy
 
 module "mongodb" {
   source                 = "terraform-aws-modules/ec2-instance/aws"
