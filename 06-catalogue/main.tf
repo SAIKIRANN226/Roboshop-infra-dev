@@ -15,6 +15,7 @@ resource "aws_lb_target_group" "catalogue" {
   }
 }
 
+# "Create one instance"
 module "catalogue" {
   source                 = "terraform-aws-modules/ec2-instance/aws"
   ami = data.aws_ami.centos8.id
@@ -29,6 +30,7 @@ module "catalogue" {
   )
 } # So this instance is created to provision this we can use provisioners or user-data,we used provisioners because if it is fails then automatically stops here below
 
+# "Provision this instance with ansible" so ami is created and provisioned
 resource "null_resource" "catalogue" {
   triggers = {
     instance_id = module.catalogue.id
@@ -49,45 +51,45 @@ resource "null_resource" "catalogue" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/bootstrap.sh",
-      "sudo sh /tmp/bootstrap.sh catalogue dev"
+      "sudo sh /tmp/bootstrap.sh catalogue dev" # Bydefault we it wont get root acccess
     ]
   }
 }
 
+# "Now stop the instance to take the AMI"
 resource "aws_ec2_instance_state" "catalogue" {
   instance_id = module.catalogue.id
   state       = "stopped"
   depends_on = [ null_resource.catalogue ]
 }
 
+# "Now take AMI"
 resource "aws_ami_from_instance" "catalogue" {
   name               = "${local.name}-${var.tags.Component}-${local.current_time}"
   source_instance_id = module.catalogue.id
-  depends_on = [ aws_ec2_instance_state.catalogue ]
+  depends_on = [ aws_ec2_instance_state.catalogue ] # Only this should run after successfull above null-resource
 }
 
+# "Now delete the instance"
 resource "null_resource" "catalogue_delete" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.catalogue.id
   }
 
   provisioner "local-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
-    command = "aws ec2 terminate-instances --instance-ids ${module.catalogue.id}"
+    command = "aws ec2 terminate-instances --instance-ids ${module.catalogue.id}" # This is aws-command line we can delete and create also,aws-command line is in my laptop so we can use local-exec
   }
 
-  depends_on = [ aws_ami_from_instance.catalogue]
+  depends_on = [aws_ami_from_instance.catalogue]
 }
 
+# "Now create launch template"
 resource "aws_launch_template" "catalogue" {
   name = "${local.name}-${var.tags.Component}"
-
   image_id = aws_ami_from_instance.catalogue.id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type = "t2.micro"
   update_default_version = true
-
   vpc_security_group_ids = [data.aws_ssm_parameter.catalogue_sg_id.value]
 
   tag_specifications {
