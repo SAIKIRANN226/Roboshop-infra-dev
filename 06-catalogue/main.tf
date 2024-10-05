@@ -102,6 +102,7 @@ resource "aws_launch_template" "catalogue" {
 
 }
 
+# "Launch template is the input of auto-scaling"
 resource "aws_autoscaling_group" "catalogue" {
   name                      = "${local.name}-${var.tags.Component}"
   max_size                  = 10
@@ -132,7 +133,7 @@ resource "aws_autoscaling_group" "catalogue" {
   }
 
   timeouts {
-    delete = "15m"
+    delete = "15m" # Instances should create with in 15min
   }
 }
 
@@ -144,7 +145,6 @@ resource "aws_lb_listener_rule" "catalogue" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.catalogue.arn
   }
-
 
   condition {
     host_header {
