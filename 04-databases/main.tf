@@ -18,7 +18,7 @@ module "mongodb" {
   )
 }
 
-resource "null_resource" "mongodb" {
+resource "null_resource" "mongodb" { # This is used to check wether the user-data is running successfully or not on the terminal so thats y we used provisioners here
   triggers = {   
     instance_id = module.mongodb.id
   }
@@ -30,7 +30,7 @@ resource "null_resource" "mongodb" {
     password = "DevOps321"
   }
 
-  provisioner "file" {  # we need to copy the bootsrap inside the instance using the above connection
+  provisioner "file" {  # We need to copy the bootsrap inside the instance using the above connection
     source      = "bootstrap.sh"
     destination = "/tmp/bootstrap.sh"
   }
