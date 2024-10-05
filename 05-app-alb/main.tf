@@ -27,7 +27,7 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# Listener is created for app-alb on http:80, there you can see a DNS name which is given by aws to the app-alb,the SG of app-alb is listening from vpn,if we turn-off vpn then it will not listen,when you delete and create then DNS name will be changed,so for that we need to create DNS record like host path 
+# Listener is created for app-alb on http:80, there you can see a DNS name which is given by aws to the app-alb,the SG of app-alb is listening from vpn so create SG of app-alb in 02-sg,if we turn-off vpn then it will not listen,when you delete and create then DNS name will be changed,so for that we need to create DNS record like host path 
 
 module "records" {
   source  = "terraform-aws-modules/route53/aws//modules/records"
