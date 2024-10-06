@@ -1,5 +1,5 @@
 resource "aws_lb" "web_alb" {
-  name               = "${local.name}-${var.tags.Component}" #roboshop-dev-app-alb
+  name               = "${local.name}-${var.tags.Component}" #roboshop-dev-web-alb
   internal           = false
   load_balancer_type = "application"
   security_groups    = [data.aws_ssm_parameter.web_alb_sg_id.value]
@@ -17,7 +17,7 @@ resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.web_alb.arn
   port              = "443"
   protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06" # This SSL policy is outdated so we need to take from the aws-console(recommended one)
   certificate_arn   = data.aws_ssm_parameter.acm_certificate_arn.value
 
   default_action {

@@ -1,6 +1,6 @@
 resource "aws_lb_target_group" "web" {
   name     = "${local.name}-${var.tags.Component}"
-  port     = 80
+  port     = 80 # Web component is running on port 80 | 443 is for web-alb | 80 is for app-alb
   protocol = "HTTP"
   vpc_id   = data.aws_ssm_parameter.vpc_id.value
   deregistration_delay = 60

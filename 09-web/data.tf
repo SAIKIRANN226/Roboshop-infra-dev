@@ -21,7 +21,7 @@ data "aws_ssm_parameter" "web_alb_sg_id" {
   name = "/${var.project_name}/${var.environment}/web_alb_sg_id"
 }
 
-data "aws_ssm_parameter" "private_subnet_ids" {
+data "aws_ssm_parameter" "private_subnet_ids" {  # We can aslo keep in private_subnet because app-alb is in public_subnet it can communicate to private_subnet
   name = "/${var.project_name}/${var.environment}/private_subnet_ids"
 }
 
