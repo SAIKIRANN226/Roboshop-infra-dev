@@ -23,7 +23,7 @@ pipeline {
             steps {
                 sh """
                     cd 02-sg
-                    terrafrom plan
+                    terraform plan
                 """
             }
         }
