@@ -1,0 +1,47 @@
+pipeline {
+    agent {
+        node {
+            label = 'AGENT-1'
+        }
+    }
+    options {
+        ansiColor('xterm')
+    }
+    parameters {
+        choice(name: 'action', choices: ['apply', 'destroy'], description: 'Pick something')
+    }
+    stages {
+        stage('init'){
+            steps {
+                sh """
+                    cd 02-sg
+                    terraform init -reconfigure
+                """
+            }
+        }
+        stage('plan'){
+            steps {
+                sh """
+                    cd 02-sg
+                    terrafrom plan
+                """
+            }
+        }
+        stage('apply'){
+            steps {
+                sh """
+                    cd 02-sg
+                    terraform apply -auto-approve
+                """
+            }
+        }
+        stage('destroy'){
+            steps {
+                sh """
+                    cd 02-sg
+                    terraform destroy -auto-approve
+                """
+            }
+        }
+    }
+}
