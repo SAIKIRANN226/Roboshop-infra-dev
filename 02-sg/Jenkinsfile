@@ -24,7 +24,7 @@ pipeline {
             steps {
                 sh """
                     cd 02-sg
-                    terraform plan
+                    terraform plan -out=tfplan
                 """
             }
         }
