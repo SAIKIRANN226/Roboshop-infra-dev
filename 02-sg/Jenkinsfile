@@ -51,6 +51,7 @@ pipeline {
             steps {
                 sh """
                     cd 02-sg
+                    terraform apply tfplan
                     terraform apply -auto-approve
                 """
             }
