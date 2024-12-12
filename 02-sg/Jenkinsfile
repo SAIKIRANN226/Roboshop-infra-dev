@@ -5,13 +5,14 @@ pipeline {
         }
     }
     options {
-        ansiColor('xterm')
+        ansiColor('exterm')
     }
     parameters {
-        choice(name: 'action', choices: ['apply', 'destroy'], description: 'Pick something')
+        choice(name:'action', choices:['apply','destroy'], description:'pick something')
     }
+
     stages {
-        stage('init'){
+        stage('Init') {
             steps {
                 sh """
                     cd 02-sg
@@ -19,7 +20,7 @@ pipeline {
                 """
             }
         }
-        stage('plan'){
+        stage('Plan') {
             steps {
                 sh """
                     cd 02-sg
@@ -27,7 +28,25 @@ pipeline {
                 """
             }
         }
-        stage('apply'){
+        stage('Apply') {
+           when {
+              expression {
+                    params.action == 'Apply'
+              }
+           }
+           steps {
+              sh """
+                cd 02-sg
+                terraform apply -auto-approve
+              """
+           }
+        }
+        stage('Destroy') {
+            when {
+                expression {
+                    params.action == 'Destroy'
+                }
+            }
             steps {
                 sh """
                     cd 02-sg
@@ -35,13 +54,11 @@ pipeline {
                 """
             }
         }
-        stage('destroy'){
-            steps {
-                sh """
-                    cd 02-sg
-                    terraform destroy -auto-approve
-                """
-            }
+    }
+
+    post {
+        always {
+            echo 'I will always say hello'
         }
     }
 }
