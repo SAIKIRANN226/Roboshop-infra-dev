@@ -1,0 +1,33 @@
+pipeline {
+    agent {
+        node {
+            label 'AGENT-1'
+        }
+    }
+    options {
+        ansiColor('exterm')
+    }
+    parameters {
+        choice(name: 'action', choices['apply','destroy']), description('pick something')
+    }
+
+    stages {
+        stage('init') {
+            steps {
+                sh """
+                    cd 03-vpn
+                    terraform init -reconfigure
+                """
+            }
+        }
+        stage('plan') {
+            steps {
+                sh """
+                    cd 03-vpn
+                    terraform plan -out=tfplan
+                    terraform apply "tfplan"
+                """
+            }
+        }
+    }
+}
