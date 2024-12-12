@@ -51,8 +51,8 @@ pipeline {
             steps {
                 sh """
                     cd 02-sg
-                    terraform apply tfplan
-                    terraform apply -auto-approve
+                    terraform destroy tfplan
+                    terraform destroy -auto-approve
                 """
             }
         }
