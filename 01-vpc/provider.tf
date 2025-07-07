@@ -2,15 +2,15 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "5.31.0" # AWS provider version, not terraform version
+      version = "5.31.0"
     }
   }
 
   backend "s3" {
-    bucket = "saifundevops"
-    key    = "vpc"
+    bucket = "your-bucket" # Create a different bucket and dynamodb table for Dev environment
+    key    = "your-key"
     region = "us-east-1"
-    dynamodb_table = "saifundevopstable"
+    dynamodb_table = "your-dynamodb-table"
   }
 }
 

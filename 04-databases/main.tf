@@ -16,14 +16,11 @@ module "mongodb" {
   )
 }
 
-resource "null_resource" "mongodb" {
-  # Changes to any instance of the cluster requires re-provisioning
+resource "null_resource" "mongodb" { # Any changes to the above instance, then it will trigger and run the below provisioner
   triggers = {
     instance_id = module.mongodb.id
   }
-
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
+  
   connection {
     host = module.mongodb.private_ip
     type = "ssh"
@@ -31,16 +28,15 @@ resource "null_resource" "mongodb" {
     password = "DevOps321"
   }
 
-  provisioner "file" {
+  provisioner "file" { # Before running the remote-exec, we need to copy the boostrap file from local to in the remote-server
     source      = "bootstrap.sh"
     destination = "/tmp/bootstrap.sh"
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
-      "sudo sh /tmp/bootstrap.sh mongodb dev"
+      "sudo sh /tmp/bootstrap.sh mongodb dev" # We dont get root access bydefault in provisioners, but we get in "user-data"
     ]
   }
 }
@@ -64,13 +60,10 @@ module "redis" {
 }
 
 resource "null_resource" "redis" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.redis.id
   }
 
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
   connection {
     host = module.redis.private_ip
     type = "ssh"
@@ -84,7 +77,6 @@ resource "null_resource" "redis" {
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh redis dev"
@@ -112,13 +104,10 @@ module "mysql" {
 }
 
 resource "null_resource" "mysql" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.mysql.id
   }
 
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
   connection {
     host = module.mysql.private_ip
     type = "ssh"
@@ -132,7 +121,6 @@ resource "null_resource" "mysql" {
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh mysql dev"
@@ -160,13 +148,10 @@ module "rabbitmq" {
 }
 
 resource "null_resource" "rabbitmq" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.rabbitmq.id
   }
 
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
   connection {
     host = module.rabbitmq.private_ip
     type = "ssh"
@@ -180,7 +165,6 @@ resource "null_resource" "rabbitmq" {
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh rabbitmq dev"
@@ -190,9 +174,7 @@ resource "null_resource" "rabbitmq" {
 
 module "records" {
   source  = "terraform-aws-modules/route53/aws//modules/records"
-
   zone_name = var.zone_name
-
   records = [
     {
       name    = "mongodb-dev"

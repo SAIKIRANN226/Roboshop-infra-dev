@@ -18,7 +18,6 @@ resource "aws_cloudfront_distribution" "daws76s" {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = "web-${var.environment}.${var.zone_name}"
-
     cache_policy_id = data.aws_cloudfront_cache_policy.cache.id
     compress               = true
     viewer_protocol_policy = "https-only"
@@ -29,7 +28,6 @@ resource "aws_cloudfront_distribution" "daws76s" {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = "web-${var.environment}.${var.zone_name}"
-
     cache_policy_id = data.aws_cloudfront_cache_policy.cache.id
     compress               = true
     viewer_protocol_policy = "https-only"
@@ -42,16 +40,19 @@ resource "aws_cloudfront_distribution" "daws76s" {
     viewer_protocol_policy = "https-only"
     cache_policy_id = data.aws_cloudfront_cache_policy.no_cache.id
   }
+
   restrictions {
     geo_restriction {
       restriction_type = "whitelist"
       locations        = ["IN", "US", "CA"]
     }
   }
+
   tags = merge(
     var.common_tags,
     var.tags
   )
+  
   viewer_certificate {
     acm_certificate_arn      = data.aws_ssm_parameter.acm_certificate_arn.value
     ssl_support_method       = "sni-only"
@@ -61,9 +62,7 @@ resource "aws_cloudfront_distribution" "daws76s" {
 
 module "records" {
   source  = "terraform-aws-modules/route53/aws//modules/records"
-
   zone_name = var.zone_name
-
   records = [
     {
       name    = "web-cdn"

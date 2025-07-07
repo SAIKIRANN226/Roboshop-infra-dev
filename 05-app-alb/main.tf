@@ -1,12 +1,9 @@
 resource "aws_lb" "app_alb" {
-  name               = "${local.name}-${var.tags.Component}" #roboshop-dev-app-alb
-  internal           = true
+  name               = "${local.name}-${var.tags.Component}"
+  internal           = true 
   load_balancer_type = "application"
   security_groups    = [data.aws_ssm_parameter.app_alb_sg_id.value]
   subnets            = split(",", data.aws_ssm_parameter.private_subnet_ids.value)
-
-  #enable_deletion_protection = true
-
   tags = merge(
     var.common_tags,
     var.tags
@@ -31,9 +28,7 @@ resource "aws_lb_listener" "http" {
 
 module "records" {
   source  = "terraform-aws-modules/route53/aws//modules/records"
-
   zone_name = var.zone_name
-
   records = [
     {
       name    = "*.app-${var.environment}"
@@ -45,3 +40,7 @@ module "records" {
     }
   ]
 }
+
+# If we keep internal = true, outside persons cannot see
+# We just given 200 rule as a default, to test
+# Why this DNS record ? DNS is not permanent, if we delete and create again same DNS will not be there

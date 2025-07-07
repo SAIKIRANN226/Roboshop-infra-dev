@@ -1,12 +1,9 @@
 resource "aws_lb" "web_alb" {
-  name               = "${local.name}-${var.tags.Component}" #roboshop-dev-app-alb
+  name               = "${local.name}-${var.tags.Component}"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [data.aws_ssm_parameter.web_alb_sg_id.value]
   subnets            = split(",", data.aws_ssm_parameter.public_subnet_ids.value)
-
-  #enable_deletion_protection = true
-
   tags = merge(
     var.common_tags,
     var.tags
@@ -20,7 +17,7 @@ resource "aws_lb_listener" "https" {
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
   certificate_arn   = data.aws_ssm_parameter.acm_certificate_arn.value
 
-  default_action {
+  default_action { # This is default rule just for testing purpose
     type = "fixed-response"
 
     fixed_response {
@@ -33,9 +30,7 @@ resource "aws_lb_listener" "https" {
 
 module "records" {
   source  = "terraform-aws-modules/route53/aws//modules/records"
-
   zone_name = var.zone_name
-
   records = [
     {
       name    = "web-${var.environment}"
@@ -47,3 +42,5 @@ module "records" {
     }
   ]
 }
+
+# HTTPS(443) is for public, HTTP(80) is for private

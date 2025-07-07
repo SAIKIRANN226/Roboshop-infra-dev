@@ -30,13 +30,10 @@ module "catalogue" {
 }
 
 resource "null_resource" "catalogue" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.catalogue.id
   }
 
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
   connection {
     host = module.catalogue.private_ip
     type = "ssh"
@@ -50,7 +47,6 @@ resource "null_resource" "catalogue" {
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh catalogue dev"
@@ -71,32 +67,26 @@ resource "aws_ami_from_instance" "catalogue" {
 }
 
 resource "null_resource" "catalogue_delete" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.catalogue.id
   }
 
   provisioner "local-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     command = "aws ec2 terminate-instances --instance-ids ${module.catalogue.id}"
   }
-
   depends_on = [ aws_ami_from_instance.catalogue]
 }
 
-resource "aws_launch_template" "catalogue" {
+resource "aws_launch_template" "catalogue" { # Hiring template to hire the employees or instances
   name = "${local.name}-${var.tags.Component}"
-
   image_id = aws_ami_from_instance.catalogue.id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type = "t2.micro"
   update_default_version = true
-
   vpc_security_group_ids = [data.aws_ssm_parameter.catalogue_sg_id.value]
 
   tag_specifications {
     resource_type = "instance"
-
     tags = {
       Name = "${local.name}-${var.tags.Component}"
     }
@@ -104,27 +94,27 @@ resource "aws_launch_template" "catalogue" {
 
 }
 
-resource "aws_autoscaling_group" "catalogue" {
+resource "aws_autoscaling_group" "catalogue" { # HR to auto-scale the instances or employees using above Launch template
   name                      = "${local.name}-${var.tags.Component}"
-  max_size                  = 10
-  min_size                  = 1
+  max_size                  = 10 # Maximum instances we put 10
+  min_size                  = 1 # Minimum instances we put 1
   health_check_grace_period = 60
   health_check_type         = "ELB"
   desired_capacity          = 2
   vpc_zone_identifier       = split(",", data.aws_ssm_parameter.private_subnet_ids.value)
-  target_group_arns = [ aws_lb_target_group.catalogue.arn ]
-  
+  target_group_arns = [ aws_lb_target_group.catalogue.arn ] # Where this instances should be placed ?
+
   launch_template {
     id      = aws_launch_template.catalogue.id
     version = aws_launch_template.catalogue.latest_version
   }
 
-  instance_refresh {
+  instance_refresh { # Nothing but rolling update
     strategy = "Rolling"
     preferences {
-      min_healthy_percentage = 50
+      min_healthy_percentage = 50 # That means minimum half your instances should be running and healthy
     }
-    triggers = ["launch_template"]
+    triggers = ["launch_template"] # Whenever the launch-template is updated then auto-scaling will automatically trigger and refresh this
   }
 
   tag {
@@ -147,7 +137,6 @@ resource "aws_lb_listener_rule" "catalogue" {
     target_group_arn = aws_lb_target_group.catalogue.arn
   }
 
-
   condition {
     host_header {
       values = ["${var.tags.Component}.app-${var.environment}.${var.zone_name}"]
@@ -165,6 +154,18 @@ resource "aws_autoscaling_policy" "catalogue" {
       predefined_metric_type = "ASGAverageCPUUtilization"
     }
 
-    target_value = 5.0
+    target_value = 5.0 # Generally it will be 75-80
   }
 }
+
+
+# Overview of the above code
+# 1. Create catalogue target group
+# 2. Create one instance
+# 3. Provision instance with ansible or shell
+# 4. Stop the instance
+# 5. Take the AMI
+# 6. Delete the instance
+# 7. Now create Launch template with the AMI
+# 8. If we give this Launch template to the auto-scaling, it will create the instances depending up on the traffic
+# 9. If you are not aware of what options to give in the code, just try to create a sample resource in the aws console, and see what options are required, and same options put in the code by taking from the google, do for every resource if you are not aware of

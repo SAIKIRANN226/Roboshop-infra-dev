@@ -30,13 +30,10 @@ module "web" {
 }
 
 resource "null_resource" "web" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.web.id
   }
 
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
   connection {
     host = module.web.private_ip
     type = "ssh"
@@ -50,7 +47,6 @@ resource "null_resource" "web" {
   }
 
   provisioner "remote-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh web dev"
@@ -71,13 +67,11 @@ resource "aws_ami_from_instance" "web" {
 }
 
 resource "null_resource" "web_delete" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     instance_id = module.web.id
   }
 
   provisioner "local-exec" {
-    # Bootstrap script called with private_ip of each node in the cluster
     command = "aws ec2 terminate-instances --instance-ids ${module.web.id}"
   }
 
@@ -86,12 +80,10 @@ resource "null_resource" "web_delete" {
 
 resource "aws_launch_template" "web" {
   name = "${local.name}-${var.tags.Component}"
-
   image_id = aws_ami_from_instance.web.id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type = "t2.micro"
   update_default_version = true
-
   vpc_security_group_ids = [data.aws_ssm_parameter.web_sg_id.value]
 
   tag_specifications {
