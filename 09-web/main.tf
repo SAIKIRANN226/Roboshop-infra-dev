@@ -1,6 +1,6 @@
 resource "aws_lb_target_group" "web" {
   name     = "${local.name}-${var.tags.Component}"
-  port     = 80
+  port     = 80 # Why web is running on port 80 ? because we have nginx in web and also once LB got the request on 443 and it will enter into our network, so the 443 will end here
   protocol = "HTTP"
   vpc_id   = data.aws_ssm_parameter.vpc_id.value
   deregistration_delay = 60

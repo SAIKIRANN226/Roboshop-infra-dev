@@ -29,7 +29,7 @@ module "catalogue" {
   )
 }
 
-resource "null_resource" "catalogue" {
+resource "null_resource" "catalogue" { # When instance is changed then automatically this will trigger
   triggers = {
     instance_id = module.catalogue.id
   }
@@ -82,7 +82,7 @@ resource "aws_launch_template" "catalogue" { # Hiring template to hire the emplo
   image_id = aws_ami_from_instance.catalogue.id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type = "t2.micro"
-  update_default_version = true
+  update_default_version = true # It will update to new version if any
   vpc_security_group_ids = [data.aws_ssm_parameter.catalogue_sg_id.value]
 
   tag_specifications {
@@ -96,15 +96,15 @@ resource "aws_launch_template" "catalogue" { # Hiring template to hire the emplo
 
 resource "aws_autoscaling_group" "catalogue" { # HR to auto-scale the instances or employees using above Launch template
   name                      = "${local.name}-${var.tags.Component}"
-  max_size                  = 10 # Maximum instances we put 10
-  min_size                  = 1 # Minimum instances we put 1
+  max_size                  = 10 # Maximum instances we put here is 10
+  min_size                  = 1 # Minimum instances we put here is 1
   health_check_grace_period = 60
-  health_check_type         = "ELB"
+  health_check_type         = "ELB" # This will check the health of LB
   desired_capacity          = 2
-  vpc_zone_identifier       = split(",", data.aws_ssm_parameter.private_subnet_ids.value)
+  vpc_zone_identifier       = split(",", data.aws_ssm_parameter.private_subnet_ids.value) # Placing catalogue servers in private subnets
   target_group_arns = [ aws_lb_target_group.catalogue.arn ] # Where this instances should be placed ?
 
-  launch_template {
+  launch_template { # This is the latest template
     id      = aws_launch_template.catalogue.id
     version = aws_launch_template.catalogue.latest_version
   }
@@ -114,7 +114,7 @@ resource "aws_autoscaling_group" "catalogue" { # HR to auto-scale the instances 
     preferences {
       min_healthy_percentage = 50 # That means minimum half your instances should be running and healthy
     }
-    triggers = ["launch_template"] # Whenever the launch-template is updated then auto-scaling will automatically trigger and refresh this
+    triggers = ["launch_template"] # Whenever the launch-template is updated then auto-scaling will automatically trigger and refresh this rolling update
   }
 
   tag {
@@ -138,7 +138,7 @@ resource "aws_lb_listener_rule" "catalogue" {
   }
 
   condition {
-    host_header {
+    host_header { # Nothing but if someone enter "catalogue.app-dev.daws76s.online" then send the request to the catalogue group
       values = ["${var.tags.Component}.app-${var.environment}.${var.zone_name}"]
     }
   }

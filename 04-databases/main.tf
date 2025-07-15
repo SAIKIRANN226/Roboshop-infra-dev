@@ -1,10 +1,10 @@
 module "mongodb" {
-  source                 = "terraform-aws-modules/ec2-instance/aws"
+  source = "terraform-aws-modules/ec2-instance/aws"
   ami = data.aws_ami.centos8.id
-  name                   = "${local.ec2_name}-mongodb"
-  instance_type          = "t3.small"
+  name = "${local.ec2_name}-mongodb"
+  instance_type = "t3.small"
   vpc_security_group_ids = [data.aws_ssm_parameter.mongodb_sg_id.value]
-  subnet_id              = local.database_subnet_id
+  subnet_id = local.database_subnet_id
   tags = merge(
     var.common_tags,
     {
@@ -16,7 +16,7 @@ module "mongodb" {
   )
 }
 
-resource "null_resource" "mongodb" { # Any changes to the above instance, then it will trigger and run the below provisioner
+resource "null_resource" "mongodb" { # You can attach local-exec or remote-exec provisioners to run commands after a resource is created, in this case we are creating mongodb instance above
   triggers = {
     instance_id = module.mongodb.id
   }
@@ -36,7 +36,7 @@ resource "null_resource" "mongodb" { # Any changes to the above instance, then i
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/bootstrap.sh",
-      "sudo sh /tmp/bootstrap.sh mongodb dev" # We dont get root access bydefault in provisioners, but we get in "user-data"
+      "sudo sh /tmp/bootstrap.sh mongodb dev" # We dont get root access by default in provisioners, but we get in "user-data"
     ]
   }
 }
@@ -91,7 +91,7 @@ module "mysql" {
   instance_type          = "t3.small"
   vpc_security_group_ids = [data.aws_ssm_parameter.mysql_sg_id.value]
   subnet_id              = local.database_subnet_id
-  iam_instance_profile = "ShellScriptRoleForRoboshop"
+  iam_instance_profile = "ShellScriptRoleForRoboshop" # Role, why we used this ? because we have one password that is roboshop@1 to get this, we used role and used lookup function for this password in ansible roles, because here ansible is provisioning the install, so ansible should get this password from the roles
   tags = merge(
     var.common_tags,
     {
@@ -135,7 +135,7 @@ module "rabbitmq" {
   instance_type          = "t3.small"
   vpc_security_group_ids = [data.aws_ssm_parameter.rabbitmq_sg_id.value]
   subnet_id              = local.database_subnet_id
-  iam_instance_profile = "ShellScriptRoleForRoboshop"
+  iam_instance_profile = "ShellScriptRoleForRoboshop" # In rabitmq also we have one username and password, siva used community module, here we are going through manually like using command (or) shell, we dont have idempotency in command or shell, so we need to use the modules, why community modules are used here ? because we dont have in official modules, so we are going for community modules, you can seach in google like "ansible rabitmq user" we can see "community.rabitmq.rabitmq_user:" but siva used command module in the roles, we can use that also but no idempotency
   tags = merge(
     var.common_tags,
     {

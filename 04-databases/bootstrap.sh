@@ -9,4 +9,4 @@ ansible-pull -U https://github.com/daws-76s/roboshop-ansible-roles-tf.git -e com
 # We need to install ansible in individual nodes also
 # If ansible wants to connect to aws then we need to install boto3 and botocore
 # Because ansible and aws is developed on the python only
-# ansible-pull -U "URL" pulls the ansible-playbooks from the a VCS repo and execute them on target machine, so we give only "localhost"
+# ansible-pull -U "URL" pulls the ansible-playbooks from the VCS repo and execute them on target machine, so we give only "localhost"

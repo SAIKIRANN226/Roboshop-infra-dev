@@ -1,9 +1,9 @@
 module "vpn" {
-  source         = "git::https://github.com/daws-76s/terraform-aws-security-group.git?ref=main"
+  source         = "git::https://github.com/daws-76s/terraform-aws-security-group.git?ref=main" # We developed SG module and kept in the github and referring from there
   project_name   = var.project_name
   environment    = var.environment
   sg_description = "SG for VPN"
-  vpc_id         = data.aws_vpc.default.id
+  vpc_id         = data.aws_vpc.default.id # Because we created vpn in default VPC
   sg_name        = "vpn"
 }
 
@@ -97,6 +97,7 @@ module "web" {
   sg_name        = "web"
 }
 
+# Security group for "app_alb"
 module "app_alb" {
   source         = "git::https://github.com/daws-76s/terraform-aws-security-group.git?ref=main"
   project_name   = var.project_name
@@ -106,6 +107,7 @@ module "app_alb" {
   sg_name        = "app-alb"
 }
 
+# Security group for "web_alb"
 module "web_alb" {
   source         = "git::https://github.com/daws-76s/terraform-aws-security-group.git?ref=main"
   project_name   = var.project_name
@@ -115,7 +117,7 @@ module "web_alb" {
   sg_name        = "web-alb"
 }
 
-# App ALB should accept connections only from VPN, since it is internal
+# App ALB should accept connections only from VPN, since it is internal, so traffic should be on port 80, if it is external or facing to the public, then traffic should be on https 443 which is secure
 resource "aws_security_group_rule" "app_alb_vpn" {
   source_security_group_id = module.vpn.sg_id
   type                     = "ingress"
@@ -191,7 +193,7 @@ resource "aws_security_group_rule" "web_alb_internet" {
   security_group_id        = module.web_alb.sg_id
 }
 
-# openvpn
+# Openvpn
 resource "aws_security_group_rule" "vpn_home" {
   security_group_id = module.vpn.sg_id
   type                     = "ingress"
@@ -211,9 +213,9 @@ resource "aws_security_group_rule" "mongodb_vpn" {
   security_group_id        = module.mongodb.sg_id
 }
 
-#mongodb accepting connections from catalogue instance
+# Mongodb accepting connections from catalogue instance
 resource "aws_security_group_rule" "mongodb_catalogue" {
-  source_security_group_id = module.catalogue.sg_id
+  source_security_group_id = module.catalogue.sg_id # Since we cannot create elastic IPs for every server, so we are giving catalogue sg_id, same for the remaining components also
   type                     = "ingress"
   from_port                = 27017
   to_port                  = 27017
@@ -221,6 +223,7 @@ resource "aws_security_group_rule" "mongodb_catalogue" {
   security_group_id        = module.mongodb.sg_id
 }
 
+# Mongodb accepting connections from user instance
 resource "aws_security_group_rule" "mongodb_user" {
   source_security_group_id = module.user.sg_id
   type                     = "ingress"
@@ -239,6 +242,7 @@ resource "aws_security_group_rule" "redis_vpn" {
   security_group_id        = module.redis.sg_id
 }
 
+# Redis is accepting connections from user
 resource "aws_security_group_rule" "redis_user" {
   source_security_group_id = module.user.sg_id
   type                     = "ingress"
@@ -248,6 +252,7 @@ resource "aws_security_group_rule" "redis_user" {
   security_group_id        = module.redis.sg_id
 }
 
+# Redis is accepting connections from cart
 resource "aws_security_group_rule" "redis_cart" {
   source_security_group_id = module.cart.sg_id
   type                     = "ingress"
@@ -267,6 +272,7 @@ resource "aws_security_group_rule" "mysql_vpn" {
   security_group_id        = module.mysql.sg_id
 }
 
+# Mysql is accepting connections from shipping
 resource "aws_security_group_rule" "mysql_shipping" {
   source_security_group_id = module.shipping.sg_id
   type                     = "ingress"
@@ -286,6 +292,7 @@ resource "aws_security_group_rule" "rabbitmq_vpn" {
   security_group_id        = module.rabbitmq.sg_id
 }
 
+# Rabbitmq is accepting connections from payment
 resource "aws_security_group_rule" "rabbitmq_payment" {
   source_security_group_id = module.payment.sg_id
   type                     = "ingress"
