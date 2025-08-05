@@ -6,10 +6,8 @@ pipeline {
     }
     options {
         ansiColor('xterm')
-        // timeout(time: 1, unit: 'HOURS')
-        // disableConcurrentBuilds()
     }
-    // build
+
     stages {
         stage('VPC') {
             steps {
@@ -60,9 +58,8 @@ pipeline {
                 }
             }
         }
-       
     }
-    // post build
+
     post { 
         always { 
             echo 'I will always say Hello again!'

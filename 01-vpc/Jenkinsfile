@@ -11,7 +11,6 @@ pipeline {
         choice(name: 'action', choices: ['apply', 'destroy'], description: 'Pick something')
     }
 
-    // Build
     stages {
         stage('Init') {
             steps {
@@ -29,7 +28,7 @@ pipeline {
                 """
             }
         }
-        stage('Deploy') {
+        stage('Apply') { 
             when {
                 expression { 
                     params.action == 'apply'
@@ -65,7 +64,6 @@ pipeline {
         }
     }
 
-    // Post Build
     post { 
         always { 
             echo 'I will always say Hello again!'
